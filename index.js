@@ -28,8 +28,14 @@ async function run() {
     // Connect the client to the server	(optional starting in v4.7)
     await client.connect();
    const catagoryCollection = client.db('libraryManagement').collection("catagory")
+   const allBooksCollection = client.db('libraryManagement').collection("allBooks")
+  //  ----------get Data ----------------------------
    app.get("/catagory",async(req,res)=>{
     const result = await catagoryCollection.find().toArray()
+    res.send(result)
+   })
+   app.get("/allbooks",async(req,res)=>{
+    const result = await allBooksCollection.find().toArray()
     res.send(result)
    })
     await client.db("admin").command({ ping: 1 });
