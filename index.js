@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(cookiParscer())
 app.use(express.json())
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri =`mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.wgy9amh.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -36,6 +36,12 @@ async function run() {
    })
    app.get("/allbooks",async(req,res)=>{
     const result = await allBooksCollection.find().toArray()
+    res.send(result)
+   })
+   app.get("/allbooks/:id",async(req,res)=>{
+    const id = req.params.id
+    const qurey = {_id:new ObjectId(id)}
+    const result = await allBooksCollection.findOne(qurey)
     res.send(result)
    })
   //  ------------post Data-------------------
