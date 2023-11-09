@@ -6,31 +6,12 @@ require('dotenv').config()
 const app = express();
 const port = process.env.PORT || 5000;
 // middleware
-app.use(cors({
-  origin:['http://localhost:5173'],
-  credentials:true
-}))
 app.use(express.json());
 app.use(cookiParscer())
 app.use(express.json())
+app.use(cors())
+
 // -----------------varifi user Token-----------------------------
-const varifiy = async (req,res,next)=>{
-  const tokenEmail = req?.cookies?.NewUserToke
-  if (!tokenEmail) {
-      return res.status(401).send({message:"aunauthrized"})
-  }
-  jwt.verify(tokenEmail,process.env.DB_TOKEN,(err,decode)=>{
-    if (err) {
-          return res.status(401).send({message:"authrized field"})
-    }
-    req.user=decode
-    
-       next()
-  })
-
-
-}
-
 
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri =`mongodb+srv://${process.env.DB_NAME}:${process.env.DB_PASS}@cluster0.wgy9amh.mongodb.net/?retryWrites=true&w=majority`;
@@ -47,7 +28,7 @@ const client = new MongoClient(uri, {
 async function run() {
   try {
     // Connect the client to the server	(optional starting in v4.7)
-    await client.connect();
+    // await client.connect();
    const catagoryCollection = client.db('libraryManagement').collection("catagory")
    const allBooksCollection = client.db('libraryManagement').collection("allBooks")
    const borrowCollection = client.db('libraryManagement').collection("borrowdBooks")
@@ -61,12 +42,13 @@ async function run() {
     const result = await topBookCallection.find().toArray()
     res.send(result)
    })
-   app.get("/allbooks",varifiy,async(req,res)=>{
+   app.get("/allbooks",async(req,res)=>{
     // const bodyEmail = req.body.varifiEmail
     // const tEmail = req.user?.tokenEmail
     // if (bodyEmail !== tEmail) {
     //   return res.status(401).send({message:"authrized field"})
     // };
+    // console.log(bodyEmail,tEmail);
   const result = await allBooksCollection.find().toArray()
   res.send(result)
    })
@@ -157,34 +139,9 @@ async function run() {
     res.send(result)
  
   })
-  // --------------jwt---------------------------
-  app.post('/jwt',async(req,res)=>{
-    try{
-      const jwtEmail =req.body
-      const token = jwt.sign(jwtEmail,process.env.DB_TOKEN,{expiresIn:"10h"})
-      res.cookie("NewUserToke",token,{
-        httpOnly:true,
-        secure:false,
-        
-      })
-      res.send(token)
-    }
-    catch(error){
-        console.log(error);
-    }
-  })
-  app.post('/clearCoki',async(req,res)=>{
-    try{
-     
-      res.clearCookie("NewUserToke",{
-          maxAge:0
-      })
-   res.send({cokki:'delete'})
-    }
-    catch(error){
 
-    }
-  })
+  // -------------------------------jwt---------------------------------------
+
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
   } finally {
